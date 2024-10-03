@@ -60,23 +60,24 @@ defmodule Plug.Router.Utils do
 
   """
   def build_host_match(host) do
-  cond do
-    is_nil(host) -> 
-      quote do: _
-    
-    String.ends_with?(host, ".localhost") ->
-      # If the host ends with `.localhost`, match any subdomain on `.localhost`
-      quote do: unquote("*.localhost")
-    
-    String.last(host) == "." ->
-      # Match any subdomain for a host ending with a dot (e.g., `localhost.` -> `localhost.*`)
-      quote do: unquote(host) <> _
-    
-    is_binary(host) ->
-      # If it's just a binary string, match exactly
-      host
+    cond do
+      is_nil(host) ->
+        quote do: _
+  
+      # Match any host ending with a dot, e.g., 'example.'
+      String.last(host) == "." ->
+        quote do: unquote(host) <> _
+  
+      # Match any host with a wildcard subdomain (e.g., '*.localhost', '*.dev', '*.example.com')
+      String.contains?(host, ".") ->
+        # If it has a dot, it should match any subdomain, e.g., '*.example.com'
+        quote do: unquote("*." <> host)
+  
+      # Exact match for binary string
+      is_binary(host) ->
+        host
+    end
   end
-end
 
   @doc """
   Generates a representation that will only match routes
