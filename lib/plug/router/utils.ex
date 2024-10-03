@@ -61,21 +61,9 @@ defmodule Plug.Router.Utils do
   """
   def build_host_match(host) do
     cond do
-      is_nil(host) ->
-        quote do: _
-  
-      # Match any host ending with a dot, e.g., 'example.'
-      String.last(host) == "." ->
-        quote do: unquote(host) <> _
-  
-      # Match any host with a wildcard subdomain (e.g., '*.localhost', '*.dev', '*.example.com')
-      String.contains?(host, ".") ->
-        # If it has a dot, it should match any subdomain, e.g., '*.example.com'
-        quote do: unquote("*." <> host)
-  
-      # Exact match for binary string
-      is_binary(host) ->
-        host
+      is_nil(host) -> quote do: _
+      String.last(host) == "." -> quote do: unquote(host) <> _
+      is_binary(host) -> host
     end
   end
 
